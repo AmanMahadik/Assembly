@@ -4,8 +4,6 @@ num2 resb 20
 res  resb 40
 
 section .data
-menu db 10,"1.Addition",10,"2.Division",10,"Enter choice: ",0
-menu_len equ $-menu
 msg1 db "Enter first number: ",0
 msg2 db "Enter second number: ",0
 msgA db "Addition = ",0
@@ -33,30 +31,20 @@ section .text
 global _start
 
 _start:
-    WRITE menu,menu_len
-    READ num1,2
-    cmp byte [num1],'1'
-    je add_op
-    cmp byte [num1],'2'
-    je div_op
-    jmp _start
-
-read_nums:
+    ; read first number
     WRITE msg1,20
     READ num1,20
     mov rsi,num1
     call atoi
-    mov rax,rax
-    mov rbx,rax
+    mov rbx,rax        ; save first number
+
+    ; read second number
     WRITE msg2,20
     READ num2,20
     mov rsi,num2
     call atoi
-    xchg rax,rbx
-    ret
 
-add_op:
-    call read_nums
+    ; addition
     add rax,rbx
     mov rdi,res
     call itoa
@@ -65,12 +53,13 @@ add_op:
     call slen
     mov rdx,rax
     WRITE res,rdx
-    jmp exit_prog
+    WRITE nl,1
 
-div_op:
-    call read_nums
+    ; division
+    mov rbx,rax        ; restore first number in rax
     xor rdx,rdx
-    idiv rbx
+    idiv rbx           ; quotient in rax, remainder in rdx
+
     mov rdi,res
     call itoa
     WRITE msgQ,11
@@ -78,9 +67,9 @@ div_op:
     call slen
     mov rdx,rax
     WRITE res,rdx
-    mov rax,rdx
-    xor rdx,rdx
-    idiv rbx
+    WRITE nl,1
+
+    mov rax,rdx        ; remainder
     mov rdi,res
     call itoa
     WRITE msgR,12
@@ -88,7 +77,12 @@ div_op:
     call slen
     mov rdx,rax
     WRITE res,rdx
-    jmp exit_prog
+    WRITE nl,1
+
+    ; exit
+    mov rax,60
+    xor rdi,rdi
+    syscall
 
 atoi:
     xor rax,rax
@@ -140,9 +134,3 @@ slen:
     jmp .lenloop
 .done:
     ret
-
-exit_prog:
-    mov rax,60
-    xor rdi,rdi
-    syscall
-
