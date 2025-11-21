@@ -1,4 +1,3 @@
-bcdtohex
 %macro WRITE 2
 	mov rax,1
 	mov rdi,1
